@@ -98,22 +98,41 @@ jobs:
       - name: Run custom script
         run: |
           build_args="--archive"
-          if [ "${{ github.event.inputs.cn }}" == "true" ]; then
+
+          CN="${{ github.event.inputs.cn }}"
+          NORMAL="${{ github.event.inputs.normal }}"
+          NO_LIGA="${{ github.event.inputs.no_liga }}"
+          NO_HINTED="${{ github.event.inputs.no_hinted }}"
+          WIDTH="${{ github.event.inputs.width }}"
+          NERD_FONT="${{ github.event.inputs.nerd_font }}"
+          FEAT="${{ github.event.inputs.feat }}"
+          BUILD_ARGS_EXTRA="${{ github.event.inputs.build_args }}"
+
+          # Apply defaults for push events (inputs are unavailable)
+          [ -n "$CN" ] || CN="false"
+          [ -n "$NORMAL" ] || NORMAL="false"
+          [ -n "$NO_LIGA" ] || NO_LIGA="false"
+          [ -n "$NO_HINTED" ] || NO_HINTED="true"
+          [ -n "$WIDTH" ] || WIDTH="narrow"
+          [ -n "$NERD_FONT" ] || NERD_FONT="none"
+          [ -n "$FEAT" ] || FEAT="cv01,cv02,cv06,cv07,cv31,cv32,cv34,cv35,cv36,cv37,cv39,cv40,cv44,cv61,cv64,ss02,ss05,ss06"
+
+          if [ "$CN" == "true" ]; then
             build_args="$build_args --cn"
           fi
-          if [ "${{ github.event.inputs.normal }}" == "true" ]; then
+          if [ "$NORMAL" == "true" ]; then
             build_args="$build_args --normal"
           fi
-          if [ "${{ github.event.inputs.no_liga }}" == "true" ]; then
+          if [ "$NO_LIGA" == "true" ]; then
             build_args="$build_args --no-liga"
           fi
-          if [ "${{ github.event.inputs.no_hinted }}" == "true" ]; then
+          if [ "$NO_HINTED" == "true" ]; then
             build_args="$build_args --no-hinted"
           fi
-          if [ "${{ github.event.inputs.width }}" != "default" ]; then
-            build_args="$build_args --width ${{ github.event.inputs.width }}"
+          if [ -n "$WIDTH" ] && [ "$WIDTH" != "default" ]; then
+            build_args="$build_args --width $WIDTH"
           fi
-          case "${{ github.event.inputs.nerd_font }}" in
+          case "$NERD_FONT" in
             default)
               build_args="$build_args --nf"
               ;;
@@ -127,11 +146,11 @@ jobs:
               build_args="$build_args --no-nf"
               ;;
           esac
-          if [ -n "${{ github.event.inputs.feat }}" ]; then
-            build_args="$build_args --feat ${{ github.event.inputs.feat }}"
+          if [ -n "$FEAT" ]; then
+            build_args="$build_args --feat $FEAT"
           fi
-          if [ -n "${{ github.event.inputs.build_args }}" ]; then
-            build_args="$build_args ${{ github.event.inputs.build_args }}"
+          if [ -n "$BUILD_ARGS_EXTRA" ]; then
+            build_args="$build_args $BUILD_ARGS_EXTRA"
           fi
 
           echo "BUILD_ARGS=$build_args" >> $GITHUB_ENV
