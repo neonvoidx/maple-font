@@ -1,6 +1,9 @@
 name: Custom Build
 
 on:
+  push:
+    branches:
+      - variable
   workflow_dispatch:
     inputs:
       cn:
@@ -21,35 +24,36 @@ on:
       no_hinted:
         description: 'Build unhinted font (add "--no-hinted" to build args)'
         required: false
-        default: false
+        default: true
         type: boolean
       width:
         description: 'Glyph width mode (add "--width <default|narrow|slim>" to build args)'
         required: false
-        default: default
+        default: narrow
         type: choice
         options:
           - default
           - narrow
           - slim
       nerd_font:
-        description: 'Nerd Font icon mode: default("--nf"), mono("--nf-mono"), proportional("--nf-propo")'
+        description: 'Nerd Font icon mode: default("--nf"), mono("--nf-mono"), proportional("--nf-propo"), none("--no-nf")'
         required: false
-        default: default
+        default: none
         type: choice
         options:
           - default
           - mono
           - proportional
+          - none
       feat:
         description: 'Enable features, split by `,`, e.g. "cv01,ss02" (add "--feat feat1,feat2" to build args)'
         required: false
-        default: ''
+        default: "cv01,cv02,cv06,cv07,cv31,cv32,cv34,cv35,cv36,cv37,cv39,cv40,cv44,cv61,cv64,ss02,ss05,ss06"
         type: string
       build_args:
-        description: 'Other args for build.py'
+        description: "Other args for build.py"
         required: false
-        default: ''
+        default: ""
         type: string
 
 permissions:
@@ -66,9 +70,9 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
-          cache: 'pip'
-          cache-dependency-path: './requirements.txt'
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: "./requirements.txt"
 
       - name: Install dependencies
         run: |
@@ -118,6 +122,9 @@ jobs:
               ;;
             proportional)
               build_args="$build_args --nf-propo"
+              ;;
+            none)
+              build_args="$build_args --no-nf"
               ;;
           esac
           if [ -n "${{ github.event.inputs.feat }}" ]; then
